@@ -130,7 +130,7 @@
     if (response == null) {
       response = '';
     }
-    if (response.result.fulfillment.speech) {
+    if (response) {
       speech = response.result.fulfillment.speech;
     }
     if ($('.message-input').val() !== '') {
