@@ -33,211 +33,237 @@
   </div>
   <div class="bg"></div>
   <script>
-  var $messages, capitalize, current_style, d, final_transcript, first_char, h, i, ignore_onend, insertMessage, linebreak, m, message, one_line, recognition, recognizing, setDate, showButtons, showInfo, startButton, start_timestamp, two_line, updateScrollbar, upgrade;
-  final_transcript = '';
-  recognizing = false;
-  ignore_onend = void 0;
-  start_timestamp = void 0;
-  upgrade = function() {
-    showInfo('info_upgrade');
-  };
-  linebreak = function(s) {
-    return s.replace(two_line, '<p></p>').replace(one_line, '<br>');
-  };
-  capitalize = function(s) {
-    return s.replace(first_char, function(m) {
-      return m.toUpperCase();
-    });
-  };
-  startButton = function(event) {
-    if (recognizing) {
-      recognition.stop();
-      return;
-    }
+    var $messages,
+      capitalize,
+      current_style,
+      d,
+      final_transcript,
+      first_char,
+      h,
+      i,
+      ignore_onend,
+      insertMessage,
+      linebreak,
+      m,
+      message,
+      one_line,
+      recognition,
+      recognizing,
+      setDate,
+      showButtons,
+      showInfo,
+      startButton,
+      start_timestamp,
+      two_line,
+      updateScrollbar,
+      upgrade;
     final_transcript = '';
-    recognition.lang = 'en-US';
-    recognition.start();
-    ignore_onend = false;
-    showButtons('none');
-    start_timestamp = event.timeStamp;
-  };
-  showInfo = function(s) {
-    var child;
-    if (s) {
-      child = info.firstChild;
-      while (child) {
-        if (child.style) {
-          child.style.display = child.id === s ? 'inline' : 'none';
-        }
-        child = child.nextSibling;
-      }
-      info.style.visibility = 'visible';
-    } else {
-      info.style.visibility = 'hidden';
-    }
-  };
-  showButtons = function(style) {
-    var current_style;
-    if (style === current_style) {
-      return;
-    }
-    current_style = style;
-  };
-  updateScrollbar = function() {
-    $messages.mCustomScrollbar('update').mCustomScrollbar('scrollTo', 'bottom', {
-      scrollInertia: 10,
-      timeout: 0
-    });
-  };
-  setDate = function() {
-    var d, m;
-    d = new Date;
-    if (m !== d.getMinutes()) {
-      m = d.getMinutes();
-      $('<div class="timestamp">' + d.getHours() + ':' + m + '</div>').appendTo($('.message:last'));
-    }
-  };
-  insertMessage = function(msg) {
-    msg = $('.message-input').val();
-    $('.message-input').val(null);
-    $('<div class="message message-personal">' + msg + '</div>').appendTo($('.mCSB_container')).addClass('new');
-    var client, handleResponse, promise, response;
-    if (msg == null) {
-      msg = '';
-    }
-    response = '';
-    handleResponse = function(serverResponse) {
-      response = serverResponse;
-      setDate();
-      updateScrollbar();
-      // setTimeout((function() {
-        message(response);
-      // }), 1000 + Math.random() * 20 * 100);
+    recognizing = false;
+    ignore_onend = void 0;
+    start_timestamp = void 0;
+    upgrade = function () {
+      showInfo('info_upgrade');
     };
-    if ($.trim(msg) === '') {
-      return false;
-    }
-    client = new ApiAi.ApiAiClient({
-      accessToken: '480d1ad1c9e64adc958020025ca8c348'
-    });
-    promise = client.textRequest(msg);
-    promise.then(handleResponse);
-  };
-  message = function(response) {
-    var speech;
-    if (response == null) {
-      response = '';
-    }
-    if (response) {
-      speech = response.result.fulfillment.speech;
-    }
-    if ($('.message-input').val() !== '') {
-      return false;
-    }
-    $('<div class="message loading new"><figure class="avatar"><img src="https://image.ibb.co/nvjPWv/logo_ava.png" /></figure><span></span></div>').appendTo($('.mCSB_container'));
-    updateScrollbar();
-    setTimeout((function() {
-      var synth, utterThis;
-      $('.message.loading').remove();
-      synth = window.speechSynthesis;
-      utterThis = new SpeechSynthesisUtterance(speech);
-      utterThis.rate = 1;
-      utterThis.lang = 'en-US';
-      synth.speak(utterThis);
-      $('<div class="message new"><figure class="avatar"><img src="https://image.ibb.co/nvjPWv/logo_ava.png" /></figure>' + speech + '</div>').appendTo($('.mCSB_container')).addClass('new');
-      setDate();
-      updateScrollbar();
-      i++;
-    }), 1000 + Math.random() * 20 * 100);
-  };
-
-  if (!('webkitSpeechRecognition' in window)) {
-    upgrade();
-  } else {
-    recognition = new webkitSpeechRecognition;
-    recognition.continuous = false;
-    recognition.interimResults = true;
-    recognition.onstart = function() {
-      recognizing = true;
+    linebreak = function (s) {
+      return s.replace(two_line, '<p></p>').replace(one_line, '<br>');
     };
-    recognition.onerror = function(event) {
-      if (event.error === 'no-speech') {
-        showInfo('info_no_speech');
-        ignore_onend = true;
-      }
-      if (event.error === 'audio-capture') {
-        showInfo('info_no_microphone');
-        ignore_onend = true;
-      }
-      if (event.error === 'not-allowed') {
-        if (event.timeStamp - start_timestamp < 100) {
-          showInfo('info_blocked');
-        } else {
-          showInfo('info_denied');
-        }
-        ignore_onend = true;
-      }
-    };
-    recognition.onend = function() {
-      recognizing = false;
-      if (ignore_onend) {
-        return;
-      }
-      if (!final_transcript) {
-        return;
-      }
-      showInfo('');
-    };
-    recognition.onresult = function(event) {
-      var i, interim_transcript;
-      interim_transcript = '';
-      i = event.resultIndex;
-      while (i < event.results.length) {
-        if (event.results[i].isFinal) {
-          final_transcript += event.results[i][0].transcript;
-        } else {
-          interim_transcript += event.results[i][0].transcript;
-        }
-        ++i;
-      }
-      final_transcript = capitalize(final_transcript);
-      insertMessage(final_transcript);
-      if (final_transcript || interim_transcript) {
-        showButtons('inline-block');
-      }
-    };
-  }
-  two_line = /\n\n/g;
-  one_line = /\n/g;
-  first_char = /\S/;
-  current_style = void 0;
-  $messages = $('.messages-content');
-  d = void 0;
-  h = void 0;
-  m = void 0;
-  i = 0;
-  $('.message-submit').click(function() {
-    insertMessage();
-  });
-  $(window).on('keydown', function(e) {
-    if (e.which === 13) {
-      insertMessage();
-      return false;
-    }
-  });
-  $(window).load(function() {
-    $messages.mCustomScrollbar();
-    setTimeout((function() {
-      var response
-      client = new ApiAi.ApiAiClient({
-        accessToken: '480d1ad1c9e64adc958020025ca8c348'
+    capitalize = function (s) {
+      return s.replace(first_char, function (m) {
+        return m.toUpperCase();
       });
+    };
+    startButton = function (event) {
+      if (recognizing) {
+        recognition.stop();
+        return;
+      }
+      final_transcript = '';
+      recognition.lang = 'en-US';
+      recognition.start();
+      ignore_onend = false;
+      showButtons('none');
+      start_timestamp = event.timeStamp;
+    };
+    showInfo = function (s) {
+      var child;
+      if (s) {
+        child = info.firstChild;
+        while (child) {
+          if (child.style) {
+            child.style.display = child.id === s
+              ? 'inline'
+              : 'none';
+          }
+          child = child.nextSibling;
+        }
+        info.style.visibility = 'visible';
+      } else {
+        info.style.visibility = 'hidden';
+      }
+    };
+    showButtons = function (style) {
+      var current_style;
+      if (style === current_style) {
+        return;
+      }
+      current_style = style;
+    };
+    updateScrollbar = function () {
+      $messages.mCustomScrollbar('update').mCustomScrollbar('scrollTo', 'bottom', {
+        scrollInertia: 10,
+        timeout: 0
+      });
+    };
+    setDate = function () {
+      var d,
+        m;
+      d = new Date;
+      if (m !== d.getMinutes()) {
+        m = d.getMinutes();
+        $('<div class="timestamp">' + d.getHours() + ':' + m + '</div>').appendTo($('.message:last'));
+      }
+    };
+    insertMessage = function (msg) {
+      msg = $('.message-input').val();
+      $('.message-input').val(null);
+      $('<div class="message message-personal">' + msg + '</div>').appendTo($('.mCSB_container')).addClass('new');
+      $('<div class="message loading new"><figure class="avatar"><img src="https://image.ibb.co/nvjPWv/logo_ava.png" /></figure><span></span></div>').appendTo($('.mCSB_container'));
+      var client,
+        handleResponse,
+        promise,
+        response;
+      if (msg == null) {
+        msg = '';
+      }
+      response = '';
+      handleResponse = function (serverResponse) {
+        response = serverResponse;
+        setDate();
+        updateScrollbar();
+        // setTimeout((function() {
+        message(response);
+        // }), 1000 + Math.random() * 20 * 100);
+      };
+      if ($.trim(msg) === '') {
+        return false;
+      }
+      client = new ApiAi.ApiAiClient({accessToken: '480d1ad1c9e64adc958020025ca8c348'});
+      promise = client.textRequest(msg);
+      promise.then(handleResponse);
+    };
+    message = function (response) {
+      var speech;
+      if (response == null) {
+        response = '';
+      }
+      if (response) {
+        speech = response.result.fulfillment.speech;
+      }
+      if ($('.message-input').val() !== '') {
+        return false;
+      }
+      updateScrollbar();
+      setTimeout((function () {
+        var synth,
+          utterThis;
+        $('.message.loading').remove();
+        synth = window.speechSynthesis;
+        utterThis = new SpeechSynthesisUtterance(speech);
+        utterThis.rate = 1;
+        utterThis.lang = 'en-US';
+        synth.speak(utterThis);
+        $('<div class="message new"><figure class="avatar"><img src="https://image.ibb.co/nvjPWv/logo_ava.png" /></figure>' + speech + '</div>').appendTo($('.mCSB_container')).addClass('new');
+        setDate();
+        updateScrollbar();
+        i++;
+      }), 1000 + Math.random() * 20 * 100);
+    };
+
+    if (!('webkitSpeechRecognition' in window)) {
+      upgrade();
+    } else {
+      recognition = new webkitSpeechRecognition;
+      recognition.continuous = false;
+      recognition.interimResults = true;
+      recognition.onstart = function () {
+        recognizing = true;
+      };
+      recognition.onerror = function (event) {
+        if (event.error === 'no-speech') {
+          showInfo('info_no_speech');
+          ignore_onend = true;
+        }
+        if (event.error === 'audio-capture') {
+          showInfo('info_no_microphone');
+          ignore_onend = true;
+        }
+        if (event.error === 'not-allowed') {
+          if (event.timeStamp - start_timestamp < 100) {
+            showInfo('info_blocked');
+          } else {
+            showInfo('info_denied');
+          }
+          ignore_onend = true;
+        }
+      };
+      recognition.onend = function () {
+        recognizing = false;
+        if (ignore_onend) {
+          return;
+        }
+        if (!final_transcript) {
+          return;
+        }
+        showInfo('');
+      };
+      recognition.onresult = function (event) {
+        var i,
+          interim_transcript;
+        interim_transcript = '';
+        i = event.resultIndex;
+        while (i < event.results.length) {
+          if (event.results[i].isFinal) {
+            final_transcript += event.results[i][0].transcript;
+          } else {
+            interim_transcript += event.results[i][0].transcript;
+          }
+          ++i;
+        }
+        final_transcript = capitalize(final_transcript);
+        insertMessage(final_transcript);
+        if (final_transcript || interim_transcript) {
+          showButtons('inline-block');
+        }
+      };
+    }
+    two_line = /\n\n/g;
+    one_line = /\n/g;
+    first_char = /\S/;
+    current_style = void 0;
+    $messages = $('.messages-content');
+    d = void 0;
+    h = void 0;
+    m = void 0;
+    i = 0;
+    $('.message-submit').click(function () {
+      insertMessage();
+    });
+    $(window).on('keydown', function (e) {
+      if (e.which === 13) {
+        insertMessage();
+        return false;
+      }
+    });
+    $(window).load(function () {
+      $messages.mCustomScrollbar();
+      $('<div class="message loading new"><figure class="avatar"><img src="https://image.ibb.co/nvjPWv/logo_ava.png" /></figure><span></span></div>').appendTo($('.mCSB_container'));
+      var response
+      client = new ApiAi.ApiAiClient({accessToken: '480d1ad1c9e64adc958020025ca8c348'});
       promise = client.textRequest('start');
-      handleResponse = function(serverResponse) {
+      handleResponse = function (serverResponse) {
         response = serverResponse;
         message(response);
       };
       promise.then(handleResponse);
-    }), 100);
-  });
+    });
   </script>
