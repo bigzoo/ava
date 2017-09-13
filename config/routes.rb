@@ -1,8 +1,8 @@
 Rails.application.routes.draw do
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.
   resources :home, only: :index
-  namespace :api do
-    namespace :v1 do
+  scope :api do
+    scope :v1 do
       resources :reminders
     end
   end
