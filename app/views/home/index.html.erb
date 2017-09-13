@@ -98,6 +98,9 @@
     }
   };
   insertMessage = function(msg) {
+    msg = $('.message-input').val();
+    $('.message-input').val(null);
+    $('<div class="message message-personal">' + msg + '</div>').appendTo($('.mCSB_container')).addClass('new');
     var client, handleResponse, promise, response;
     if (msg == null) {
       msg = '';
@@ -105,10 +108,12 @@
     response = '';
     handleResponse = function(serverResponse) {
       response = serverResponse;
+      setDate();
+      updateScrollbar();
+      // setTimeout((function() {
+        message(response);
+      // }), 1000 + Math.random() * 20 * 100);
     };
-    if (msg === '') {
-      msg = $('.message-input').val();
-    }
     if ($.trim(msg) === '') {
       return false;
     }
@@ -117,13 +122,6 @@
     });
     promise = client.textRequest(msg);
     promise.then(handleResponse);
-    $('<div class="message message-personal">' + msg + '</div>').appendTo($('.mCSB_container')).addClass('new');
-    setDate();
-    $('.message-input').val(null);
-    updateScrollbar();
-    setTimeout((function() {
-      message(response);
-    }), 1000 + Math.random() * 20 * 100);
   };
   message = function(response) {
     var speech;
