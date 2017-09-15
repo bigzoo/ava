@@ -22,7 +22,6 @@ class RemindersController < ActionController::API
   def create
     tkn = {session_token:token}
     reminder_param = reminder_params.merge(tkn)
-    binding.pry
     @reminder = Reminder.create!(reminder_param)
     json_response(@reminder, :created)
   end
