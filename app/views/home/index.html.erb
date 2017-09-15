@@ -116,6 +116,20 @@
         timeout: 0
       });
     };
+    reminder = function (response) {
+      if (response.result.action=='alarm.confirm') {
+        var base_url = window.location.href;
+        var api_url = base_url+'api/v1';
+        var params = response.result.contexts[0].parameters;
+        var data = { date : params.date, time : params.time, name : params.name, recurrence: params.recurrence };
+        $.ajax({
+          type: "POST",
+          url: api_url+'/reminders',
+          data: data,
+          dataType: 'application/json'
+        });
+      }
+    }
     setDate = function () {
       var d,
         m;
