@@ -118,7 +118,7 @@
     };
     reminder = function (response) {
       if (response.result.action=='alarm.confirm') {
-        var base_url = window.location.href;
+        var base_url = window.location.href.split('#')[0];
         var api_url = base_url+'api/v1';
         var params = response.result.contexts[0].parameters;
         var data = { date : params.date, time : params.time, name : params.name, recurrence: params.recurrence };
@@ -131,7 +131,7 @@
       }
     }
     nameStuff = function (response) {
-      var base_url = window.location.href;
+      var base_url = window.location.href.split('#')[0];
       var api_url = base_url+'api/v1';
       if (response.result.action=='name.user.get') {
         var request = $.ajax({
