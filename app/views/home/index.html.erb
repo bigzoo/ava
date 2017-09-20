@@ -151,14 +151,21 @@
           var r = response.result.fulfillment.speech;
           response.result.fulfillment.speech = r + ' ' + JSON.parse(request.responseText).name;
         }
-      } else if (response.result.action=='name.user.save'){
-        var data = { name: response.result.parameters.name };
-        $.ajax({
+      } else if (response.result.action=='name.user.save' || response.result.action=='name.user.change' || response.result.action=='name.user.confirm'){
+        var name = response.result.parameters.name
+        var data = { name: name };
+        var request = $.ajax({
           type: "POST",
           url: api_url+'/name',
           data: data,
           dataType: 'application/json',
         });
+        answers = ['Okey Dokey '+ name+'.',
+        'I\'ll remember that '+name+'.',
+        'Thanks '+ name + ' for telling me your name.',
+        'Sure thing '+name+'.'];
+        pick = Math.floor(Math.random() * (answers.length - 1 + 1)) + 1;
+        response.result.fulfillment.speech = answers[pick];
       }
     }
     setDate = function () {
