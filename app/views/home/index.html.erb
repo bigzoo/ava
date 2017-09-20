@@ -130,6 +130,37 @@
         });
       }
     }
+    nameStuff = function (response) {
+      var base_url = window.location.href;
+      var api_url = base_url+'api/v1';
+      if (response.result.action=='name.user.get') {
+        var request = $.ajax({
+          type: "GET",
+          url: api_url+'/name',
+          dataType: 'application/json',
+          async: false
+        });
+        if (JSON.parse(request.responseText).name=='' || JSON.parse(request.responseText).name==null){
+          answers = ['I don\'t know you yet :(',
+          'You haven\'t told me your name yet :(',
+          'You haven\'t told me your that yet',
+          'You gotta tell me that first.']
+          pick = Math.floor(Math.random() * (answers.length - 1 + 1)) + 1;
+          response.result.fulfillment.speech = answers[pick];
+        }else{
+          var r = response.result.fulfillment.speech;
+          response.result.fulfillment.speech = r + ' ' + JSON.parse(request.responseText).name;
+        }
+      } else if (response.result.action=='name.user.save'){
+        var data = { name: response.result.parameters.name };
+        $.ajax({
+          type: "POST",
+          url: api_url+'/name',
+          data: data,
+          dataType: 'application/json',
+        });
+      }
+    }
     setDate = function () {
       var d,
         m;
@@ -150,6 +181,7 @@
       response = '';
       handleResponse = function (response) {
         reminder(response);
+        nameStuff(response);
         $('<div class="message message-personal">' + msg + '</div>').appendTo($('.mCSB_container')).addClass('new');
         setDate();
         $('.message-input').val(null);
