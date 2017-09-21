@@ -30,3 +30,4 @@ gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
 gem 'jquery-rails'
 gem 'dotenv-rails'
 gem 'api-ai-ruby'
+gem 'google-api-client'
