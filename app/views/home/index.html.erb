@@ -5,7 +5,7 @@
   <p id="info_no_microphone" style="display:none">
     No microphone was found. Ensure that a microphone is installed and that
     <a href="//support.google.com/chrome/bin/answer.py?hl=en&amp;answer=1407892">
-      microphone settings are okey</a>
+      microphone settings</a>
     are configured correctly.</p>
   <p id="info_denied">Permission to use microphone was denied.</p>
   <p id="info_blocked">Permission to use microphone is blocked. To change, go to chrome://settings/contentExceptions#media-stream</p>
@@ -118,7 +118,7 @@
     };
     reminder = function (response) {
       if (response.result.action=='alarm.confirm') {
-        var base_url = window.location.href;
+        var base_url = window.location.href.split('#')[0];
         var api_url = base_url+'api/v1';
         var params = response.result.contexts[0].parameters;
         var data = { date : params.date, time : params.time, name : params.name, recurrence: params.recurrence };
@@ -128,6 +128,44 @@
           data: data,
           dataType: 'application/json'
         });
+      }
+    }
+    nameStuff = function (response) {
+      var base_url = window.location.href.split('#')[0];
+      var api_url = base_url+'api/v1';
+      if (response.result.action=='name.user.get') {
+        var request = $.ajax({
+          type: "GET",
+          url: api_url+'/name',
+          dataType: 'application/json',
+          async: false
+        });
+        if (JSON.parse(request.responseText).name=='' || JSON.parse(request.responseText).name==null){
+          answers = ['I don\'t know you yet :(',
+          'You haven\'t told me your name yet :(',
+          'You haven\'t told me your that yet',
+          'You gotta tell me that first.']
+          pick = Math.floor(Math.random() * (answers.length - 1 + 1)) + 1;
+          response.result.fulfillment.speech = answers[pick];
+        }else{
+          var r = response.result.fulfillment.speech;
+          response.result.fulfillment.speech = r + ' ' + JSON.parse(request.responseText).name;
+        }
+      } else if (response.result.action=='name.user.save' || response.result.action=='name.user.change' || response.result.action=='name.user.confirm'){
+        var name = response.result.parameters.name
+        var data = { name: name };
+        var request = $.ajax({
+          type: "POST",
+          url: api_url+'/name',
+          data: data,
+          dataType: 'application/json',
+        });
+        answers = ['Okey Dokey '+ name+'.',
+        'I\'ll remember that '+name+'.',
+        'Thanks '+ name + ' for telling me your name.',
+        'Sure thing '+name+'.'];
+        pick = Math.floor(Math.random() * (answers.length - 1 + 1)) + 1;
+        response.result.fulfillment.speech = answers[pick];
       }
     }
     setDate = function () {
@@ -150,6 +188,7 @@
       response = '';
       handleResponse = function (response) {
         reminder(response);
+        nameStuff(response);
         $('<div class="message message-personal">' + msg + '</div>').appendTo($('.mCSB_container')).addClass('new');
         setDate();
         $('.message-input').val(null);

@@ -10,6 +10,7 @@ Rails.application.routes.draw do
   scope :api do
     scope :v1 do
       resources :reminders
+      resource :name , controller: :name
     end
   end
   root 'home#index'
