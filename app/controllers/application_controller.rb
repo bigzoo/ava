@@ -11,6 +11,6 @@ class ApplicationController < ActionController::Base
 
   #google auth
   def current_user
-    @current_user ||= User.find(session[:user_id]) if session[:user_id]
+    @current_user ||= User.find(session[:user_id]) if session[:user_id]  && User.exists?(id:session[:user_id])
   end
 end
