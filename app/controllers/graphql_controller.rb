@@ -1,0 +1,2 @@
+class GraphqlController < ApplicationController
+end
