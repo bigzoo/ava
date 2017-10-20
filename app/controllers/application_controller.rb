@@ -7,6 +7,7 @@ class ApplicationController < ActionController::Base
   def sessionise
     session[:token] = Session.create(token:rand(36**50).to_s(36)).token if !session[:token] || !Session.exists?(token:session[:token])
     cookies[:token] = session[:token]
+    # cal = GoogleCalendar.new(current_user)
   end
 
   #google auth

@@ -1,4 +1,7 @@
 Rails.application.routes.draw do
+  if Rails.env.development?
+    mount GraphiQL::Rails::Engine, at: "/graphiql", graphql_path: "/api/v2"
+  end
   get 'sessions/create'
 
   get 'sessions/destroy'
@@ -11,6 +14,9 @@ Rails.application.routes.draw do
     scope :v1 do
       resources :reminders
       resource :name , controller: :name
+    end
+    scope :v2 do
+       post '/', to: 'graphql#execute'
     end
   end
   root 'home#index'
